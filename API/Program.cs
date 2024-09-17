@@ -1,4 +1,6 @@
 using DATA;
+using DATA.Interfaces;
+using DATA.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +17,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 
 //CORS
 builder.Services.AddCors();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 var app = builder.Build();
 
