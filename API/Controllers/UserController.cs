@@ -1,4 +1,5 @@
 ﻿using DATA;
+using DATA.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MODEL.DTOs;
@@ -11,10 +12,12 @@ namespace API.Controllers
     public class UserController : BaseApiController
     {
         private readonly ApplicationDbContext _context;
+        private readonly ITokenService _tokenService;
 
-        public UserController(ApplicationDbContext context)
+        public UserController(ApplicationDbContext context, ITokenService tokenService)
         {
             _context = context;
+            _tokenService = tokenService;
         }
 
         [HttpGet]
@@ -58,8 +61,14 @@ namespace API.Controllers
             };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
+
+            var userDto = new UserDto()
+            {
+                UserName = user.UserName,
+                Token = _tokenService.CreateToken(user)
+            };
             //return user;
-            return Ok(user);
+            return Ok(userDto);
         }
 
         [HttpPost("login")]   //Post: api/user/login
@@ -83,7 +92,13 @@ namespace API.Controllers
                     return Unauthorized("Invalid password"); //Return 401
                 }
             }
-            return Ok(user);
+
+            var userDto = new UserDto()
+            {
+                UserName = user.UserName,
+                Token = _tokenService.CreateToken(user)
+            };
+            return Ok(userDto);
         }
 
         private async Task<bool> UserExist(string username)
